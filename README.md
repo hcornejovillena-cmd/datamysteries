@@ -15,8 +15,11 @@ a la causa real.
 
 ```r
 # install.packages("devtools")
-devtools::install_github("hcornejovillena-cmd/datamysteries")
+devtools::install_github("hcornejovillena-cmd/datamysteries", build_vignettes = TRUE)
 ```
+
+`build_vignettes = TRUE` es necesario para poder abrir las guias del
+caso con `vignette()` — por defecto `install_github()` no las instala.
 
 ## Caso 1: "La caida de Lucahura"
 
