@@ -37,11 +37,12 @@ Datasets incluidos:
 | `marketing`   | Presupuesto trimestral de marketing por region          |
 | `competitors` | Apertura de competidores por region                     |
 
-Para empezar el caso:
+Para empezar el caso (disponible en espanol e ingles):
 
 ```r
 library(datamysteries)
-vignette("caso1-la-caida-de-lucahura", package = "datamysteries")
+vignette("caso1-la-caida-de-lucahura", package = "datamysteries")       # espanol
+vignette("case1-the-lucahura-sales-drop", package = "datamysteries")   # english
 ```
 
 La vignette guia el analisis capitulo a capitulo (`select()`/`filter()`,
