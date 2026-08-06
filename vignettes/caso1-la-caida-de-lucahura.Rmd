@@ -1,0 +1,291 @@
+---
+title: "Caso 1: La caida de Lucahura"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Caso 1: La caida de Lucahura}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Prologo: el caso
+
+Eres analista de datos en **Lucahura Retail Group**, una cadena de retail
+con 9 tiendas repartidas en tres regiones: *North*, *Central* y *South*.
+
+El gerente regional te escribe preocupado: las ventas del tercer
+trimestre de 2025 cayeron con fuerza en una de las tres regiones, y en la
+sala de reuniones ya circulan varias teorias sobre la causa:
+
+1. "Subimos los precios y la gente dejo de comprar."
+2. "Recortamos el presupuesto de marketing."
+3. "Se nos fueron varios vendedores clave."
+4. "Abrio un competidor cerca."
+
+Tu trabajo es usar R para revisar los datos, descartar las teorias
+falsas y quedarte con la explicacion que realmente sostienen los
+numeros. Vas a necesitar seis tablas, todas incluidas en este paquete:
+`sales`, `stores`, `products`, `employees`, `marketing` y `competitors`.
+
+Antes de tocar una sola hipotesis, carga el paquete y da un primer
+vistazo a los datos con `glimpse()`:
+
+```{r setup}
+library(datamysteries)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(stringr)
+
+dplyr::glimpse(sales)
+dplyr::glimpse(stores)
+```
+
+En una sesion interactiva de RStudio tambien puedes correr
+`View(sales)` para explorar la tabla completa en una pestana aparte.
+
+**Pregunta de reflexion:** antes de escribir una sola linea de analisis,
+¿cual de las cuatro teorias te parece mas probable solo por intuicion?
+Anotala — al final del caso podras comparar tu corazonada con la
+evidencia.
+
+---
+
+## Capitulo 1: ¿subieron los precios?
+
+La teoria mas repetida en la sala de reuniones es la de los precios. Antes
+de calcular nada, conviene mirar que informacion tenemos disponible sobre
+precios con `select()` y luego usar `filter()` con operadores logicos
+para aislar la region bajo sospecha.
+
+```{r cap1-precios}
+products |>
+  dplyr::select(product_id, category, list_price)
+```
+
+```{r cap1-south}
+south_stores <- stores |>
+  dplyr::filter(region == "South")
+
+south_stores
+```
+
+**Hallazgo:** la tabla `products` tiene un unico precio de lista por
+producto para *toda* la empresa — no hay una columna de region ni de
+tienda. Es decir, si los precios subieron, subieron igual en las 9
+tiendas, no solo en South.
+
+**Pregunta de reflexion:** si un cambio de precio aplica por igual a
+todas las regiones, ¿puede por si solo explicar una caida de ventas que
+solo ocurre en una region?
+
+---
+
+## Capitulo 2: cuantificando el cambio con `mutate()` y `arrange()`
+
+La tabla `products` solo tiene el precio *actual*. Para saber si el
+precio realmente subio y cuando, hay que calcularlo a partir de
+`sales`, dividiendo el monto vendido entre las unidades: `amount /
+quantity`.
+
+```{r cap2-precio-unitario}
+precio_unitario <- sales |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::mutate(
+    unit_price = amount / quantity,
+    year_month = format(date, "%Y-%m")
+  ) |>
+  dplyr::group_by(region, year_month) |>
+  dplyr::summarise(avg_price = mean(unit_price), .groups = "drop")
+
+precio_unitario |>
+  dplyr::arrange(year_month) |>
+  head(12)
+```
+
+Ahora calculemos la variacion porcentual de ventas mes a mes por tienda,
+y ordenemos de mayor a menor caida:
+
+```{r cap2-variacion}
+sales |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::group_by(store_id, region, date) |>
+  dplyr::summarise(monthly_amount = sum(amount), .groups = "drop") |>
+  dplyr::arrange(store_id, date) |>
+  dplyr::mutate(
+    pct_change = (monthly_amount / dplyr::lag(monthly_amount) - 1) * 100,
+    .by = store_id
+  ) |>
+  dplyr::filter(!is.na(pct_change)) |>
+  dplyr::arrange(pct_change) |>
+  head(10)
+```
+
+**Hallazgo:** el precio unitario promedio sube en algun punto de 2025 —
+pero al comparar `region` contra `year_month`, la subida ocurre **en las
+tres regiones al mismo tiempo**. En cambio, las caidas porcentuales mas
+fuertes en `pct_change` se concentran en tiendas de una sola region.
+
+**Pregunta de reflexion:** con esta evidencia, ¿la teoria del precio
+queda descartada, confirmada, o necesita mas datos?
+
+---
+
+## Capitulo 3: comparando regiones con `group_by()` y `summarize()`
+
+Confirmemos el patron anterior de forma mas directa: ventas totales por
+region y mes.
+
+```{r cap3-por-region}
+ventas_por_region <- sales |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::mutate(year_month = format(date, "%Y-%m")) |>
+  dplyr::group_by(region, year_month) |>
+  dplyr::summarise(total = sum(amount), .groups = "drop")
+
+ventas_por_region |>
+  dplyr::filter(year_month >= "2025-05") |>
+  tidyr::pivot_wider(names_from = region, values_from = total)
+```
+
+**Hallazgo:** apunta aqui, con tus propias palabras, en que mes y en que
+region se nota el quiebre, y como se comportan las otras dos regiones en
+el mismo periodo.
+
+**Pregunta de reflexion:** con la teoria del precio debilitada, ¿que
+otras dos hipotesis quedan por revisar? Repasa la lista del prologo.
+
+---
+
+## Capitulo 4: cruzando con personal (`left_join()`)
+
+Una de las teorias de la sala de reuniones habla de la salida de
+vendedores clave. Crucemos `employees` con `stores` para ver la rotacion
+por region.
+
+```{r cap4-empleados}
+salidas_2025 <- employees |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::filter(!is.na(termination_date), termination_date >= as.Date("2025-01-01"))
+
+salidas_2025 |>
+  dplyr::count(region, sort = TRUE)
+```
+
+```{r cap4-fechas}
+salidas_2025 |>
+  dplyr::filter(region == "South") |>
+  dplyr::arrange(termination_date) |>
+  dplyr::select(employee_id, store_id, hire_date, termination_date)
+```
+
+**Hallazgo:** anota cuantas salidas hubo en cada region durante 2025 y en
+que meses se concentran las de la region mas afectada.
+
+**Pregunta de reflexion:** ¿las fechas de salida ocurren antes, durante o
+despues de la caida de ventas que identificaste en el capitulo 3?
+
+---
+
+## Capitulo 5: presupuesto y competencia (`str_detect()` y fechas)
+
+Nos quedan dos hipotesis: el recorte de marketing y la apertura de un
+competidor. Empecemos por marketing, comparando el presupuesto de la
+region sospechosa contra las demas:
+
+```{r cap5-marketing}
+marketing |>
+  dplyr::filter(start_date >= as.Date("2025-01-01")) |>
+  dplyr::arrange(region, start_date) |>
+  dplyr::select(region, start_date, budget)
+```
+
+Ahora revisemos `competitors`. Usa `str_detect()` sobre el nombre del
+competidor si quieres filtrar por palabra clave, y las funciones de
+`lubridate` para comparar que tan reciente es cada apertura:
+
+```{r cap5-competencia}
+competitors |>
+  dplyr::mutate(
+    anios_desde_apertura = lubridate::interval(opening_date, as.Date("2025-12-01")) %/% months(12)
+  ) |>
+  dplyr::arrange(opening_date)
+```
+
+```{r cap5-strdetect}
+competitors |>
+  dplyr::filter(stringr::str_detect(competitor, "Max|Value|Quick"))
+```
+
+**Hallazgo:** compara el presupuesto de marketing de la region afectada
+contra su propia historia (¿bajo respecto a trimestres anteriores?) y
+contra las otras regiones. Despues compara la antiguedad de cada
+competidor: ¿cual abrio hace anios y cual abrio hace pocos meses?
+
+**Pregunta de reflexion:** de las cuatro teorias originales, ¿cuales
+puedes descartar con la evidencia que ya reuniste, y cuales siguen en
+pie?
+
+---
+
+## Capitulo 6: visualizando el hallazgo con `ggplot2`
+
+Un grafico suele convencer a un gerente mas rapido que una tabla. Grafica
+la evolucion mensual de ventas por region:
+
+```{r cap6-plot, fig.width=7, fig.height=4}
+sales |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::group_by(region, date) |>
+  dplyr::summarise(total = sum(amount), .groups = "drop") |>
+  ggplot2::ggplot(ggplot2::aes(x = date, y = total, color = region)) +
+  ggplot2::geom_line(linewidth = 1) +
+  ggplot2::labs(
+    title = "Ventas mensuales por region",
+    x = NULL, y = "Monto vendido", color = "Region"
+  ) +
+  ggplot2::theme_minimal()
+```
+
+**Hallazgo:** describe con tus palabras lo que muestra el grafico. ¿En
+que mes se separa la linea de la region afectada de las otras dos?
+
+---
+
+## Capitulo final: armando el caso completo
+
+Ya tienes evidencia de seis angulos distintos: precios, ventas por
+region, rotacion de personal, presupuesto de marketing y apertura de
+competidores. Ahora te toca combinarlos en una sola tabla que resuma la
+region con problemas, y usarla para sostener tu conclusion.
+
+```{r cap-final-resumen}
+resumen_south <- sales |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::filter(region == "South") |>
+  dplyr::mutate(periodo = dplyr::if_else(date < as.Date("2025-07-01"), "antes", "despues")) |>
+  dplyr::group_by(periodo) |>
+  dplyr::summarise(ventas_promedio_mes = mean(amount), .groups = "drop")
+
+resumen_south
+```
+
+Con esa tabla, mas lo que ya encontraste en `employees` y `competitors`
+para la region South, tienes todo lo necesario para responder:
+
+**Pregunta final de reflexion:** escribe en dos o tres frases cual crees
+que es la causa real de la caida de ventas, que teorias descartaste y
+por que, y que recomendarias al gerente regional para los proximos
+meses.
+
+> Si quieres comparar tu conclusion con la de un docente, el paquete
+> incluye un archivo `solutions/case1_solution.R` (fuera de la
+> instalacion del paquete, disponible en el repositorio de GitHub) con
+> el analisis completo y la revelacion final — evitalo hasta que hayas
+> escrito tu propia respuesta.
