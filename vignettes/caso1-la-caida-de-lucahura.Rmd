@@ -57,29 +57,76 @@ evidencia.
 
 ---
 
-## Capitulo 1: ¿subieron los precios?
+## Capitulo 1: ¿donde esta la caida?
 
-La teoria mas repetida en la sala de reuniones es la de los precios. Antes
-de calcular nada, conviene mirar que informacion tenemos disponible sobre
-precios con `select()` y luego usar `filter()` con operadores logicos
-para aislar la region bajo sospecha.
+Antes de revisar causas, confirma primero si la caida existe, cuando
+empieza y en que region se concentra. Para eso, combina `sales` con
+`stores`, resume las ventas por region y mes, y compara los meses
+alrededor del tercer trimestre de 2025.
 
-```{r cap1-precios}
+```{r cap1-por-region}
+ventas_por_region <- sales |>
+  dplyr::left_join(stores, by = "store_id") |>
+  dplyr::mutate(year_month = format(date, "%Y-%m")) |>
+  dplyr::group_by(region, year_month) |>
+  dplyr::summarise(total = sum(amount), .groups = "drop")
+
+ventas_por_region |>
+  dplyr::filter(year_month >= "2025-05") |>
+  tidyr::pivot_wider(names_from = region, values_from = total)
+```
+
+Ahora calcula el cambio porcentual de junio a julio de 2025 para cada
+region. La region con el cambio mas negativo sera tu principal sospechosa.
+
+```{r cap1-region-afectada}
+region_afectada <- ventas_por_region |>
+  dplyr::filter(year_month %in% c("2025-06", "2025-07")) |>
+  dplyr::arrange(region, year_month) |>
+  dplyr::mutate(
+    pct_change = (total / dplyr::lag(total) - 1) * 100,
+    .by = region
+  ) |>
+  dplyr::filter(year_month == "2025-07") |>
+  dplyr::arrange(pct_change) |>
+  dplyr::slice(1) |>
+  dplyr::pull(region)
+
+region_afectada
+```
+
+**Hallazgo:** apunta aqui, con tus propias palabras, en que region se
+nota el quiebre y que tan distinto es su comportamiento frente a las
+otras regiones.
+
+**Pregunta de reflexion:** antes de mirar causas, ¿que evidencia minima
+necesitas para afirmar que el problema es regional y no de toda la
+empresa?
+
+---
+
+## Capitulo 2: ¿subieron los precios?
+
+La teoria mas repetida en la sala de reuniones es la de los precios. Ya
+identificaste la region afectada; ahora revisa si la informacion de
+precios permite explicar una caida localizada.
+
+```{r cap2-precios}
 products |>
   dplyr::select(product_id, category, list_price)
 ```
 
-```{r cap1-south}
-south_stores <- stores |>
-  dplyr::filter(region == "South")
+```{r cap2-region-afectada-tiendas}
+tiendas_region_afectada <- stores |>
+  dplyr::filter(region == region_afectada)
 
-south_stores
+tiendas_region_afectada
 ```
 
 **Hallazgo:** la tabla `products` tiene un unico precio de lista por
-producto para *toda* la empresa — no hay una columna de region ni de
+producto para *toda* la empresa; no hay una columna de region ni de
 tienda. Es decir, si los precios subieron, subieron igual en las 9
-tiendas, no solo en South.
+tiendas, no solo en la region afectada.
 
 **Pregunta de reflexion:** si un cambio de precio aplica por igual a
 todas las regiones, ¿puede por si solo explicar una caida de ventas que
@@ -87,14 +134,14 @@ solo ocurre en una region?
 
 ---
 
-## Capitulo 2: cuantificando el cambio con `mutate()` y `arrange()`
+## Capitulo 3: cuantificando el cambio con `mutate()` y `arrange()`
 
 La tabla `products` solo tiene el precio *actual*. Para saber si el
 precio realmente subio y cuando, hay que calcularlo a partir de
 `sales`, dividiendo el monto vendido entre las unidades: `amount /
 quantity`.
 
-```{r cap2-precio-unitario}
+```{r cap3-precio-unitario}
 precio_unitario <- sales |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::mutate(
@@ -112,7 +159,7 @@ precio_unitario |>
 Ahora calculemos la variacion porcentual de ventas mes a mes por tienda,
 y ordenemos de mayor a menor caida:
 
-```{r cap2-variacion}
+```{r cap3-variacion}
 sales |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::group_by(store_id, region, date) |>
@@ -137,12 +184,12 @@ queda descartada, confirmada, o necesita mas datos?
 
 ---
 
-## Capitulo 3: comparando regiones con `group_by()` y `summarize()`
+## Capitulo 4: comparando regiones con `group_by()` y `summarize()`
 
 Confirmemos el patron anterior de forma mas directa: ventas totales por
 region y mes.
 
-```{r cap3-por-region}
+```{r cap4-por-region}
 ventas_por_region <- sales |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::mutate(year_month = format(date, "%Y-%m")) |>
@@ -159,17 +206,17 @@ region se nota el quiebre, y como se comportan las otras dos regiones en
 el mismo periodo.
 
 **Pregunta de reflexion:** con la teoria del precio debilitada, ¿que
-otras dos hipotesis quedan por revisar? Repasa la lista del prologo.
+otras tres hipotesis quedan por revisar? Repasa la lista del prologo.
 
 ---
 
-## Capitulo 4: cruzando con personal (`left_join()`)
+## Capitulo 5: cruzando con personal (`left_join()`)
 
 Una de las teorias de la sala de reuniones habla de la salida de
 vendedores clave. Crucemos `employees` con `stores` para ver la rotacion
 por region.
 
-```{r cap4-empleados}
+```{r cap5-empleados}
 salidas_2025 <- employees |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::filter(!is.na(termination_date), termination_date >= as.Date("2025-01-01"))
@@ -178,7 +225,7 @@ salidas_2025 |>
   dplyr::count(region, sort = TRUE)
 ```
 
-```{r cap4-fechas}
+```{r cap5-fechas}
 salidas_2025 |>
   dplyr::filter(region == "South") |>
   dplyr::arrange(termination_date) |>
@@ -189,17 +236,17 @@ salidas_2025 |>
 que meses se concentran las de la region mas afectada.
 
 **Pregunta de reflexion:** ¿las fechas de salida ocurren antes, durante o
-despues de la caida de ventas que identificaste en el capitulo 3?
+despues de la caida de ventas que identificaste en el capitulo 4?
 
 ---
 
-## Capitulo 5: presupuesto y competencia (`str_detect()` y fechas)
+## Capitulo 6: presupuesto y competencia (`str_detect()` y fechas)
 
 Nos quedan dos hipotesis: el recorte de marketing y la apertura de un
 competidor. Empecemos por marketing, comparando el presupuesto de la
 region sospechosa contra las demas:
 
-```{r cap5-marketing}
+```{r cap6-marketing}
 marketing |>
   dplyr::filter(start_date >= as.Date("2025-01-01")) |>
   dplyr::arrange(region, start_date) |>
@@ -210,7 +257,7 @@ Ahora revisemos `competitors`. Usa `str_detect()` sobre el nombre del
 competidor si quieres filtrar por palabra clave, y las funciones de
 `lubridate` para comparar que tan reciente es cada apertura:
 
-```{r cap5-competencia}
+```{r cap6-competencia}
 competitors |>
   dplyr::mutate(
     anios_desde_apertura = lubridate::interval(opening_date, as.Date("2025-12-01")) %/% months(12)
@@ -218,7 +265,7 @@ competitors |>
   dplyr::arrange(opening_date)
 ```
 
-```{r cap5-strdetect}
+```{r cap6-strdetect}
 competitors |>
   dplyr::filter(stringr::str_detect(competitor, "Max|Value|Quick"))
 ```
@@ -234,12 +281,12 @@ pie?
 
 ---
 
-## Capitulo 6: visualizando el hallazgo con `ggplot2`
+## Capitulo 7: visualizando el hallazgo con `ggplot2`
 
 Un grafico suele convencer a un gerente mas rapido que una tabla. Grafica
 la evolucion mensual de ventas por region:
 
-```{r cap6-plot, fig.width=7, fig.height=4}
+```{r cap7-plot, fig.width=7, fig.height=4}
 sales |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::group_by(region, date) |>
@@ -260,7 +307,7 @@ que mes se separa la linea de la region afectada de las otras dos?
 
 ## Capitulo final: armando el caso completo
 
-Ya tienes evidencia de seis angulos distintos: precios, ventas por
+Ya tienes evidencia de cinco angulos distintos: precios, ventas por
 region, rotacion de personal, presupuesto de marketing y apertura de
 competidores. Ahora te toca combinarlos en una sola tabla que resuma la
 region con problemas, y usarla para sostener tu conclusion.
@@ -269,20 +316,24 @@ region con problemas, y usarla para sostener tu conclusion.
 resumen_south <- sales |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::filter(region == "South") |>
+  dplyr::group_by(date) |>
+  dplyr::summarise(ventas_mes = sum(amount), .groups = "drop") |>
   dplyr::mutate(periodo = dplyr::if_else(date < as.Date("2025-07-01"), "antes", "despues")) |>
   dplyr::group_by(periodo) |>
-  dplyr::summarise(ventas_promedio_mes = mean(amount), .groups = "drop")
+  dplyr::summarise(ventas_promedio_mes = mean(ventas_mes), .groups = "drop")
 
 resumen_south
 ```
 
 Con esa tabla, mas lo que ya encontraste en `employees` y `competitors`
-para la region South, tienes todo lo necesario para responder:
+para la region South, tienes todo lo necesario para responder como
+analista de negocios:
 
-**Pregunta final de reflexion:** escribe en dos o tres frases cual crees
-que es la causa real de la caida de ventas, que teorias descartaste y
-por que, y que recomendarias al gerente regional para los proximos
-meses.
+**Decision ejecutiva:** el gerente regional tiene presupuesto para una
+sola intervencion durante los proximos 60 dias. Escribe una recomendacion
+en dos o tres frases: cual crees que es la causa real de la caida, que
+teorias descartaste y por que, que accion priorizarias, y que indicador
+usarias para evaluar si la intervencion funciono.
 
 > Si quieres comparar tu conclusion con la de un docente, el paquete
 > incluye un archivo `solutions/case1_solution.R` (fuera de la

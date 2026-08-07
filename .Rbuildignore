@@ -1,5 +1,12 @@
 ^datamysteries\.Rproj$
 ^\.Rproj\.user$
+^\.git$
+^\.github$
+^\.gitignore$
+^\.Rhistory$
+^.*\.Rcheck$
+^.*\.tar\.gz$
+^r-lib$
 ^LICENSE\.md$
 ^solutions$
 ^datamysteries-plan\.md$

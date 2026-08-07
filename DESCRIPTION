@@ -1,8 +1,15 @@
 Package: datamysteries
 Title: Business Case Mysteries for Learning R and the Tidyverse
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R:
-    person("Hugo", "Cornejo Villena", , "hcornejovillena@gmail.com", role = c("aut", "cre"))
+    person(
+        given = "Hugo",
+        family = "Cornejo Villena",
+        email = "hcornejovillena@gmail.com",
+        role = c("aut", "cre")
+    )
+Author: Hugo Cornejo Villena [aut, cre]
+Maintainer: Hugo Cornejo Villena <hcornejovillena@gmail.com>
 Description: A collection of fictional business-case "mysteries" for
     teaching R and the tidyverse through case-based learning, aimed at
     management, marketing, and international business students. Each
@@ -16,7 +23,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Suggests: 
-    dplyr,
+    dplyr (>= 1.1.0),
     ggplot2,
     knitr,
     lubridate,
@@ -25,6 +32,6 @@ Suggests:
     testthat,
     tidyr
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 Config/roxygen2/version: 8.1.0
 VignetteBuilder: knitr

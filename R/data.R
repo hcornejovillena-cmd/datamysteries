@@ -8,7 +8,7 @@
 #' Lucahura Retail Group, used in Case 1 ("La caida de Lucahura"). Covers
 #' 24 months (January 2024 to December 2025) for the package's 9 stores.
 #'
-#' @format Un data frame / a data frame con 432 filas y 4 columnas:
+#' @format Un data frame / a data frame con 1296 filas y 5 columnas:
 #' \describe{
 #'   \item{date}{Primer dia del mes / first day of the month (`Date`).}
 #'   \item{store_id}{Identificador de tienda, ver \code{\link{stores}} /

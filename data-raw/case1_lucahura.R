@@ -4,8 +4,9 @@
 ## 3 regiones x 3 tiendas = 9 tiendas, 24 meses (2024-01 a 2025-12)
 ##
 ## Causa real incrustada: rotacion de personal clave + apertura de un
-## competidor en la region "South", ambas en el segundo trimestre de 2025,
-## que en conjunto explican la caida de ventas del Q3 2025 en esa region.
+## competidor en la region "South", ambas en el segundo trimestre de 2025.
+## La caida no se impone como una variable directa: emerge de una menor
+## capacidad comercial, presion competitiva y una interaccion entre ambas.
 ##
 ## Senuelos incrustados (no explican la caida regional):
 ## - Subida de precios: ocurre en TODAS las regiones por igual en 2025-04,
@@ -53,6 +54,13 @@ products <- tibble::tribble(
 price_increase_date <- as.Date("2025-04-01")
 price_increase_factor <- 1.08
 
+staffing_disruption_start <- as.Date("2025-07-01")
+competitor_effect_start <- as.Date("2025-07-01")
+combined_disruption_start <- max(staffing_disruption_start, competitor_effect_start)
+sales_capacity_factor <- 0.80
+competitive_pressure_factor <- 0.82
+disruption_interaction_factor <- 0.92
+
 # ---- sales -----------------------------------------------------------
 
 months <- seq(as.Date("2024-01-01"), as.Date("2025-12-01"), by = "1 month")
@@ -68,16 +76,28 @@ sales <- tidyr::expand_grid(date = months, store_id = stores$store_id,
     # tendencia de crecimiento suave + estacionalidad de fin de ano
     trend = 1 + 0.006 * month_index,
     seasonality = 1 + 0.25 * (month(date) %in% c(11, 12)),
-    # causa real: caida en South a partir de julio 2025 (mes 18),
-    # por rotacion de personal clave + apertura de competidor
-    south_drop = dplyr::if_else(
-      region == "South" & date >= as.Date("2025-07-01"),
-      0.60,
+    # mecanismos causales: la perdida de vendedores reduce capacidad
+    # comercial; el competidor empieza a capturar demanda desde el primer
+    # mes completo posterior a su apertura; juntos se refuerzan.
+    sales_capacity = dplyr::if_else(
+      region == "South" & date >= staffing_disruption_start,
+      sales_capacity_factor,
+      1
+    ),
+    competitive_pressure = dplyr::if_else(
+      region == "South" & date >= competitor_effect_start,
+      competitive_pressure_factor,
+      1
+    ),
+    disruption_interaction = dplyr::if_else(
+      region == "South" & date >= combined_disruption_start,
+      disruption_interaction_factor,
       1
     ),
     noise = stats::rnorm(dplyr::n(), mean = 1, sd = 0.05),
     quantity = pmax(0, round(base_quantity[product_id] * trend * seasonality *
-                                south_drop * noise)),
+                                sales_capacity * competitive_pressure *
+                                disruption_interaction * noise)),
     unit_price = dplyr::if_else(date >= price_increase_date,
                                  list_price,
                                  round(list_price / price_increase_factor, 2)),
@@ -173,9 +193,9 @@ competitors <- tibble::tribble(
 
 # ---- guardar como datos del paquete ----------------------------------
 
-usethis::use_data(sales, overwrite = TRUE)
-usethis::use_data(stores, overwrite = TRUE)
-usethis::use_data(products, overwrite = TRUE)
-usethis::use_data(employees, overwrite = TRUE)
-usethis::use_data(marketing, overwrite = TRUE)
-usethis::use_data(competitors, overwrite = TRUE)
+save(sales, file = "data/sales.rda", compress = "xz")
+save(stores, file = "data/stores.rda", compress = "xz")
+save(products, file = "data/products.rda", compress = "xz")
+save(employees, file = "data/employees.rda", compress = "xz")
+save(marketing, file = "data/marketing.rda", compress = "xz")
+save(competitors, file = "data/competitors.rda", compress = "xz")

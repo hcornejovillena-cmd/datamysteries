@@ -5,7 +5,7 @@
 \alias{sales}
 \title{Ventas mensuales de Lucahura Retail Group / Monthly sales}
 \format{
-Un data frame / a data frame con 432 filas y 4 columnas:
+Un data frame / a data frame con 1296 filas y 5 columnas:
 \describe{
 \item{date}{Primer dia del mes / first day of the month (\code{Date}).}
 \item{store_id}{Identificador de tienda, ver \code{\link{stores}} /

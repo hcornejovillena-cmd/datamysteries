@@ -98,9 +98,11 @@ competitors |>
 resumen_south <- sales |>
   dplyr::left_join(stores, by = "store_id") |>
   dplyr::filter(region == "South") |>
+  dplyr::group_by(date) |>
+  dplyr::summarise(ventas_mes = sum(amount), .groups = "drop") |>
   dplyr::mutate(periodo = dplyr::if_else(date < as.Date("2025-07-01"), "antes", "despues")) |>
   dplyr::group_by(periodo) |>
-  dplyr::summarise(ventas_promedio_mes = mean(amount), .groups = "drop")
+  dplyr::summarise(ventas_promedio_mes = mean(ventas_mes), .groups = "drop")
 
 resumen_south
 
@@ -126,6 +128,10 @@ sales |>
 ##   contratacion) y lanzar una respuesta comercial focalizada frente a
 ##   MaxSave Express (South especificamente, no un recorte/aumento
 ##   generico de precio o marketing a nivel compania).
+## - Indicador de seguimiento: ventas mensuales promedio de South y tasa
+##   de recuperacion frente al promedio de North/Central durante los
+##   proximos 60 dias. Tambien conviene monitorear rotacion del equipo de
+##   ventas para confirmar que la capacidad comercial se estabiliza.
 ## - Mediano plazo: revisar por que se fueron los vendedores clave
 ##   (compensacion, carga de trabajo, clima laboral) para evitar que se
 ##   repita el patron en otras regiones.

@@ -1,0 +1,37 @@
+---
+title: "Caso N: Titulo del caso"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Caso N: Titulo del caso}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Prologo: el caso
+
+Presenta el problema de negocio sin revelar la causa raiz.
+
+## Capitulo 1: confirmar el problema
+
+Antes de investigar causas, confirma que el problema existe, cuando
+empieza y donde se concentra.
+
+## Capitulo 2: primera hipotesis
+
+Evalua una hipotesis plausible y decide si la evidencia la sostiene.
+
+## Capitulo 3: segunda hipotesis
+
+Evalua otra hipotesis plausible.
+
+## Capitulo final: decision ejecutiva
+
+Resume la evidencia y formula una recomendacion: una accion prioritaria,
+un plazo y un indicador para evaluar si funciono.
