@@ -69,14 +69,10 @@
 
 #' Empleados de Lucahura Retail Group / Employees
 #'
-#' Historial de contratacion y salida de empleados por tienda. Incluye
-#' rotacion de base en todas las tiendas y, en las tiendas de la region
-#' South, salidas concentradas de vendedores clave entre abril y junio de
-#' 2025.
+#' Historial de contratacion y salida de empleados por tienda de Lucahura
+#' Retail Group.
 #'
-#' Hiring and termination history by store. Includes baseline turnover
-#' across all stores and, in the South region's stores, concentrated
-#' departures of key salespeople between April and June 2025.
+#' Hiring and termination history by store for Lucahura Retail Group.
 #'
 #' @format Un data frame / a data frame con 1 fila por empleado y 4
 #'   columnas:
@@ -96,13 +92,9 @@
 
 #' Campanas de marketing de Lucahura Retail Group / Marketing campaigns
 #'
-#' Presupuesto trimestral de marketing por region, de 2024 a 2025. El
-#' presupuesto sigue una tendencia estable y creciente en las tres
-#' regiones, sin recortes anomalos.
+#' Presupuesto trimestral de marketing por region, de 2024 a 2025.
 #'
-#' Quarterly marketing budget by region, 2024 to 2025. Budget follows a
-#' stable, gently increasing trend across all three regions, with no
-#' anomalous cuts.
+#' Quarterly marketing budget by region, 2024 to 2025.
 #'
 #' @format Un data frame / a data frame con 24 filas y 5 columnas:
 #' \describe{
@@ -122,14 +114,9 @@
 
 #' Competidores de Lucahura Retail Group / Competitors
 #'
-#' Apertura de competidores por region. North y Central tienen competencia
-#' establecida desde hace anios, sin relacion temporal con ninguna caida
-#' de ventas; South tiene un competidor de apertura reciente que coincide
-#' con la caida de ventas del Caso 1.
+#' Apertura de competidores por region para Lucahura Retail Group.
 #'
-#' Competitor openings by region. North and Central have long-established
-#' competitors with no temporal link to any sales drop; South has a
-#' recently opened competitor that coincides with Case 1's sales drop.
+#' Competitor openings by region for Lucahura Retail Group.
 #'
 #' @format Un data frame / a data frame con 3 filas y 3 columnas:
 #' \describe{

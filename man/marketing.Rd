@@ -26,13 +26,9 @@ data created for the datamysteries package.
 marketing
 }
 \description{
-Presupuesto trimestral de marketing por region, de 2024 a 2025. El
-presupuesto sigue una tendencia estable y creciente en las tres
-regiones, sin recortes anomalos.
+Presupuesto trimestral de marketing por region, de 2024 a 2025.
 }
 \details{
-Quarterly marketing budget by region, 2024 to 2025. Budget follows a
-stable, gently increasing trend across all three regions, with no
-anomalous cuts.
+Quarterly marketing budget by region, 2024 to 2025.
 }
 \keyword{datasets}

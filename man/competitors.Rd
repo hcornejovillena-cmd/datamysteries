@@ -22,14 +22,9 @@ data created for the datamysteries package.
 competitors
 }
 \description{
-Apertura de competidores por region. North y Central tienen competencia
-establecida desde hace anios, sin relacion temporal con ninguna caida
-de ventas; South tiene un competidor de apertura reciente que coincide
-con la caida de ventas del Caso 1.
+Apertura de competidores por region para Lucahura Retail Group.
 }
 \details{
-Competitor openings by region. North and Central have long-established
-competitors with no temporal link to any sales drop; South has a
-recently opened competitor that coincides with Case 1's sales drop.
+Competitor openings by region for Lucahura Retail Group.
 }
 \keyword{datasets}

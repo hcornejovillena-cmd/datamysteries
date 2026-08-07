@@ -10,3 +10,5 @@
 ^LICENSE\.md$
 ^solutions$
 ^datamysteries-plan\.md$
+^data-raw$
+^CONTRIBUTING\.md$

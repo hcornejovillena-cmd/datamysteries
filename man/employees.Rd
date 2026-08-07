@@ -26,14 +26,10 @@ data created for the datamysteries package.
 employees
 }
 \description{
-Historial de contratacion y salida de empleados por tienda. Incluye
-rotacion de base en todas las tiendas y, en las tiendas de la region
-South, salidas concentradas de vendedores clave entre abril y junio de
-2025.
+Historial de contratacion y salida de empleados por tienda de Lucahura
+Retail Group.
 }
 \details{
-Hiring and termination history by store. Includes baseline turnover
-across all stores and, in the South region's stores, concentrated
-departures of key salespeople between April and June 2025.
+Hiring and termination history by store for Lucahura Retail Group.
 }
 \keyword{datasets}
