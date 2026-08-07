@@ -1,5 +1,5 @@
 Package: datamysteries
-Title: Business Case Mysteries for Learning R and the Tidyverse
+Title: Data Mystery Cases for Learning R and the Tidyverse
 Version: 0.1.0
 Authors@R:
     person(
@@ -10,14 +10,14 @@ Authors@R:
     )
 Author: Hugo Cornejo Villena [aut, cre]
 Maintainer: Hugo Cornejo Villena <hcornejovillena@gmail.com>
-Description: A collection of fictional business-case "mysteries" for
-    teaching R and the tidyverse through case-based learning, aimed at
-    management, marketing, and international business students. Each
-    case presents a narrative business problem (e.g. a sales drop) that
-    students investigate with progressively introduced R/tidyverse
-    commands, ruling out decoy hypotheses to uncover the real root
-    cause. Datasets and narratives are provided bilingually
-    (Spanish/English).
+Description: A collection of fictional data "mysteries" for teaching R
+    and the tidyverse through case-based learning. Each case presents a
+    narrative applied problem that students investigate with progressively
+    introduced R/tidyverse commands, ruling out decoy hypotheses to
+    uncover an evidence-based explanation. Cases can cover business,
+    fraud, operations, environmental, health, engineering, education, or
+    other applied domains. Datasets and narratives are provided
+    bilingually (Spanish/English) when available.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

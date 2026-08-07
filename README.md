@@ -1,20 +1,29 @@
 # datamysteries
 
+<img src="man/figures/logo.png" align="right" width="150" alt="datamysteries logo"/>
+
+![version](https://img.shields.io/badge/version-0.1.0-blue)
+![R](https://img.shields.io/badge/R-%3E%3D%204.1.0-blue)
+![license](https://img.shields.io/badge/license-MIT-green)
+![lang](https://img.shields.io/badge/lang-ES%20%7C%20EN-orange)
+![lifecycle](https://img.shields.io/badge/lifecycle-pilot-yellow)
+[![release](https://img.shields.io/github/v/release/hcornejovillena-cmd/datamysteries?label=release)](https://github.com/hcornejovillena-cmd/datamysteries/releases)
 [![R CMD check](https://github.com/hcornejovillena-cmd/datamysteries/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hcornejovillena-cmd/datamysteries/actions/workflows/R-CMD-check.yaml)
 
-`datamysteries` es una coleccion de **casos de negocio ficticios tipo
-"misterio"** para aprender R y el tidyverse mediante aprendizaje basado
-en casos, pensada para estudiantes de administracion, marketing y
-negocios internacionales sin experiencia previa en R.
+`datamysteries` es una coleccion de **casos ficticios tipo "misterio"**
+para aprender R y el tidyverse mediante aprendizaje basado en casos.
+Cada caso plantea una situacion aplicada que debe investigarse con datos,
+descartando hipotesis falsas ("senuelos") hasta llegar a una explicacion
+sostenida por evidencia.
 
-En vez de datasets genericos (`iris`, `mtcars`), cada caso presenta un
-problema de negocio narrado (una caida de ventas, un fraude, una fuga de
-clientes...) que se investiga con comandos de R/tidyverse introducidos
-progresivamente, descartando hipotesis falsas ("senuelos") hasta llegar
-a la causa real.
+En vez de datasets genericos (`iris`, `mtcars`), el paquete propone
+historias investigables: una caida de ventas, un fraude, una fuga de
+clientes, una anomalia ambiental, un problema operativo, un caso de salud
+publica o cualquier otro escenario donde los datos permitan reconstruir
+que ocurrio.
 
-El objetivo no es solo aprender comandos: es practicar el razonamiento de
-un analista de negocios con datos.
+El objetivo no es solo aprender comandos: es practicar razonamiento
+analitico con datos en contextos reales o verosimiles.
 
 ## Instalacion
 
@@ -85,10 +94,11 @@ instala junto con el paquete).
 
 **Objetivo del Caso 1:** que el estudiante aprenda a formular hipotesis,
 cruzar tablas, descartar explicaciones plausibles y cerrar con una
-recomendacion ejecutiva basada en datos.
+recomendacion basada en datos.
 
 **Publico sugerido:** cursos introductorios de R, estadistica aplicada,
-analitica de negocios, marketing analytics o business intelligence.
+ciencia de datos, analitica de negocios, investigacion aplicada o
+metodologia cuantitativa en distintas disciplinas.
 
 **Duracion estimada:** 60 a 90 minutos, segun si se trabaja como
 demostracion guiada o como ejercicio en grupos.
@@ -114,10 +124,11 @@ carpeta esta pensada para docentes y no se instala con el paquete.
 
 ## Escalabilidad
 
-El paquete esta pensado desde el inicio para alojar multiples casos
-(ventas, fraude interno, fuga de clientes, campanas fallidas), no solo
-el Caso 1, y para adopcion bilingue (espanol/ingles) por otras
-universidades.
+El paquete esta pensado desde el inicio para alojar multiples casos y no
+solo el Caso 1. Aunque Lucahura es un caso de negocios, la misma
+arquitectura puede adaptarse a fraudes, investigaciones policiales,
+ingenieria, ambiente, salud publica, enfermeria, educacion u otros campos
+donde aprender R tenga mas sentido a partir de una pregunta aplicada.
 
 Para proponer o crear nuevos casos, revisa [CONTRIBUTING.md](CONTRIBUTING.md).
 
